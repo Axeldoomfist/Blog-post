@@ -63,6 +63,7 @@ def allpostids():
 #Create
 @APP.route("/", methods=["PUT"])
 def createpost():
+    """Creates a post"""
     dtformat = NOW.strftime('%d/%m/%Y')
     timeformat = NOW.strftime('%H:%M')
     pids = allpostids()
@@ -92,6 +93,7 @@ def getallposts():
 #Update
 @APP.route("/", methods=["POST"])
 def changepost():
+    """Changes a post"""
     pid = request.form['id']
     post = singlepost(pid)
     change = request.form["body"]
@@ -105,6 +107,7 @@ def changepost():
 #Delete
 @APP.route("/<int:id>", methods=['DELETE'])
 def deletepost(id):
+    """Deletes a post"""
     file_name = 'posts/'+ str(id) + '.json'
     try:
         singlepost(id)
@@ -112,6 +115,6 @@ def deletepost(id):
         return '{"success":"false"}'
     os.remove(file_name)
     return '{"success":"true"}'
-    
+
 if __name__ == "__main__":
     APP.run()
