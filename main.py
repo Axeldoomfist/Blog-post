@@ -28,7 +28,7 @@ def writefile(file, contents):
 
 def ask():
     """Gets a file from the user"""
-    asks = "Post.json"#input("Enter the name of your file: ")
+    asks = "Post.json"
     return asks
 
 def allposts():
@@ -55,10 +55,34 @@ def getposttable():
     postsobj = json.loads(openfile("posts.json"))
     return postsobj
 def allpostids():
+    """Gets the post table"""
     ptable = getposttable()
     return ptable['ids']
 
+def singleuser(id):
+    usr = openfile("userdata/"+ str(id) + ".json")
+    return json.loads(usr)
+
+def edituser(id, content):
+    file_name = 'userdata/' + str(id) + '.json'
+    try:
+        writefile(file_name,content)
+    except IOError:
+        print('Error editing the file')
+        raise IOError
+
+def getusertable():
+    userobj = json.loads(openfile("user.json"))
+    return userobj
+
+def alluserids():
+    """Gets the user table"""
+    utable = getusertable()
+    return utable['ids']
+
 # Route definitions
+
+#Posts
 
 #Create
 @APP.route("/", methods=["PUT"])
@@ -70,9 +94,8 @@ def createpost():
     pids.sort()
     pid = pids[0] + 1
     add = request.form['body']
-    uid = ''
-    if request.form['uid'] != None:
-        uid = request.form['uid']
+    uid = request.form['uid']   # if request.form['uid'] != None:
+                                #     uid = request.form['uid']
     post = {"id": pid, "Date": dtformat, "Time": timeformat, "Post": add, "Userid": uid}
     editpost(pid, post)
     return jsonify({"success": "true", "post_id": pid})
@@ -87,6 +110,7 @@ def getpost(id):
 
 @APP.route("/", methods=["GET"])
 def getallposts():
+    """Gets all the posts"""
     posts = allposts()
     return jsonify(posts)
 
@@ -111,6 +135,51 @@ def deletepost(id):
     file_name = 'posts/'+ str(id) + '.json'
     try:
         singlepost(id)
+    except:
+        return '{"success":"false"}'
+    os.remove(file_name)
+    return '{"success":"true"}'
+
+#Users
+
+#Create
+@APP.route("/", methods=['PUT'])
+def createuser():
+    """Creates a user"""
+    uids = alluserids()
+    uids.sort()
+    uid = uids[0] + 1
+    usr = request.form['username']
+    pswd = request.form['password']
+    email = request.form['email']
+    name = request.form['name']
+    userdata = {"uid": uid, "username": usr, "password": pswd, "email": email, "name": name}
+    edituser(uid, userdata)
+    return jsonify({"success": "true", "post_id": uid})
+
+#Read
+@APP.route("/<id>", methods=['GET'])
+def getuser(id):
+    user = singleuser(id)
+    user_json = jsonify(**user)
+    return user_json
+#Update
+@APP.route("/", methods=["POST"])
+def changeuser():
+    """Changes a users data"""
+    cuser = json.loads(request.data)
+    try:
+        edituser(cuser['id'], cuser)
+        return '{"success":"true"}'
+    except IOError:
+        return '{"success":"false"}'
+    
+#Delete
+@APP.route("/<int:id>", methods=['DELETE'])
+def deleteuser(id):
+    file_name = 'userdata/'+ str(id) + '.json'
+    try:
+        singleuser(id)
     except:
         return '{"success":"false"}'
     os.remove(file_name)
