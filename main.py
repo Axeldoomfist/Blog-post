@@ -1,6 +1,7 @@
 import datetime
 import os
 import hashlib
+import binascii
 from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
 
@@ -101,7 +102,7 @@ def updateusr(id):
 def delusr(id):
     file_name = 'users.json'
     users = json.loads(openfile(file_name))
-    users['ids'].append(id)
+    users['ids'].pop(id-1)
     writefile(file_name, users)
 
 def getusertable():
@@ -114,10 +115,10 @@ def alluserids():
     return utable['ids']
 
 def hashpswd(password):
-    """Hashes the new users password"""
-    salt = os.urandom(20).hex
-    hashpassword = hashlib.md5(salt.encode('UTF-8') + password.encode('UTF-8') + ':' + salt)
-    hashedpswd = hashpassword.hexdigest()
+    """Hashes the users password"""
+    salt = binascii.hexlify(os.urandom(20)).decode()
+    hashpassword = hashlib.md5(salt.encode('UTF-8') + password.encode('UTF-8'))
+    hashedpswd = hashpassword.hexdigest() + ':' + salt
     return hashedpswd
 
 def checkpswd(hashedpswd, user_pswd):
@@ -235,6 +236,7 @@ def deleteuser(id):
     file_name = 'userdata/'+ str(id) + '.json'
     try:
         singleuser(id)
+        delusr(id)
     except:
         return '{"success":"false"}'
     os.remove(file_name)
