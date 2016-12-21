@@ -115,9 +115,17 @@ def alluserids():
 
 def hashpswd(password):
     """Hashes the new users password"""
-    hashpassword = hashlib.md5(password.encode('UTF-8'))
+    salt = os.urandom(20).hex
+    hashpassword = hashlib.md5(salt.encode('UTF-8') + password.encode('UTF-8') + ':' + salt)
     hashedpswd = hashpassword.hexdigest()
     return hashedpswd
+
+def checkpswd(hashedpswd, user_pswd):
+    """Checks the users password"""
+    password, salt = hashedpswd.split(':')
+    password = hashlib.md5(salt.encode('UTF-8') + user_pswd.encode('UTF-8'))
+    password = password.hexdigest()
+    return password
 
 # Route definitions
 
@@ -214,8 +222,9 @@ def getallusers():
 def changeuser():
     """Changes a users data"""
     cuser = json.loads(request.data)
+    cuser['password'] = hashpswd(cuser['password'])
     try:
-        edituser(cuser['id'], cuser)
+        edituser(cuser['uid'], cuser)
         return '{"success":"true"}'
     except IOError:
         return '{"success":"false"}'
