@@ -1,5 +1,6 @@
 import datetime
 import os
+import hashlib
 from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
 
@@ -59,6 +60,14 @@ def allpostids():
     ptable = getposttable()
     return ptable['ids']
 
+def allusers():
+    uids = alluserids()
+    users = []
+    for uid in uids:
+        file = singleuser(uid)
+        users.append(file)
+    return users
+
 def singleuser(id):
     usr = openfile("userdata/"+ str(id) + ".json")
     return json.loads(usr)
@@ -72,13 +81,19 @@ def edituser(id, content):
         raise IOError
 
 def getusertable():
-    userobj = json.loads(openfile("user.json"))
+    userobj = json.loads(openfile("users.json"))
     return userobj
 
 def alluserids():
     """Gets the user table"""
     utable = getusertable()
     return utable['ids']
+
+def hashpswd(password):
+    """Hashes the new users password"""
+    hashpassword = hashlib.md5(password.encode('UTF-8'))
+    hashedpswd = hashpassword.hexdigest()
+    return hashedpswd
 
 # Route definitions
 
@@ -143,26 +158,30 @@ def deletepost(id):
 #Users
 
 #Create
-@APP.route("/", methods=['PUT'])
+@APP.route("/usr", methods=['PUT'])
 def createuser():
     """Creates a user"""
     uids = alluserids()
     uids.sort()
     uid = uids[0] + 1
-    usr = request.form['username']
-    pswd = request.form['password']
-    email = request.form['email']
-    name = request.form['name']
-    userdata = {"uid": uid, "username": usr, "password": pswd, "email": email, "name": name}
-    edituser(uid, userdata)
+    newuser = json.loads(request.data)
+    newuser['uid'] = uid
+    newuser['password'] = hashpswd(newuser['password'])
+    edituser(uid, newuser)
     return jsonify({"success": "true", "post_id": uid})
 
 #Read
-@APP.route("/<id>", methods=['GET'])
+@APP.route("/usr/<id>", methods=['GET'])
 def getuser(id):
     user = singleuser(id)
     user_json = jsonify(**user)
     return user_json
+
+@APP.route("/usr", methods=['GET'])
+def getallusers():
+    """Gets all the users"""
+    users = allusers()
+    return jsonify(users)
 #Update
 @APP.route("/", methods=["POST"])
 def changeuser():
