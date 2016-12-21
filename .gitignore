@@ -46,7 +46,11 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Irrevelant files
 posts/
 userdata/
 users.json
 posts.json
+
+# IDE Generated files
+.vscode
