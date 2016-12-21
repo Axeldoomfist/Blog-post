@@ -52,6 +52,18 @@ def editpost(id, content):
         print('Error editing the file')
         raise IOError
 
+def updatepost(id):
+    file_name = 'posts.json'
+    posts = json.loads(openfile(file_name))
+    posts['ids'].append(id)
+    writefile(file_name, posts)
+
+def deletepst(id):
+    file_name = 'posts.json'
+    posts = json.loads(openfile(file_name))
+    posts['ids'].pop(id-1)
+    writefile(file_name, posts)
+
 def getposttable():
     postsobj = json.loads(openfile("posts.json"))
     return postsobj
@@ -80,6 +92,18 @@ def edituser(id, content):
         print('Error editing the file')
         raise IOError
 
+def updateusr(id):
+    file_name = 'users.json'
+    users = json.loads(openfile(file_name))
+    users['ids'].append(id)
+    writefile(file_name, users)
+
+def delusr(id):
+    file_name = 'users.json'
+    users = json.loads(openfile(file_name))
+    users['ids'].append(id)
+    writefile(file_name, users)
+
 def getusertable():
     userobj = json.loads(openfile("users.json"))
     return userobj
@@ -100,37 +124,38 @@ def hashpswd(password):
 #Posts
 
 #Create
-@APP.route("/", methods=["PUT"])
+@APP.route("/post", methods=["PUT"])
 def createpost():
     """Creates a post"""
     dtformat = NOW.strftime('%d/%m/%Y')
     timeformat = NOW.strftime('%H:%M')
     pids = allpostids()
-    pids.sort()
+    pids.sort(reverse=True)
     pid = pids[0] + 1
-    add = request.form['body']
-    uid = request.form['uid']   # if request.form['uid'] != None:
-                                #     uid = request.form['uid']
-    post = {"id": pid, "Date": dtformat, "Time": timeformat, "Post": add, "Userid": uid}
-    editpost(pid, post)
+    newpost = json.loads(request.data)
+    newpost['id'] = pid
+    newpost['date'] = dtformat
+    newpost['time'] = timeformat
+    editpost(pid, newpost)
+    updatepost(pid)
     return jsonify({"success": "true", "post_id": pid})
 
 #Read
-@APP.route("/<id>", methods=["GET"])
+@APP.route("/post/<id>", methods=["GET"])
 def getpost(id):
     """Main function"""
     post = singlepost(id)
     post_json = jsonify(**post)
     return post_json
 
-@APP.route("/", methods=["GET"])
+@APP.route("/post", methods=["GET"])
 def getallposts():
     """Gets all the posts"""
     posts = allposts()
     return jsonify(posts)
 
 #Update
-@APP.route("/", methods=["POST"])
+@APP.route("/post", methods=["POST"])
 def changepost():
     """Changes a post"""
     pid = request.form['id']
@@ -144,12 +169,13 @@ def changepost():
         return '{"success":"false"}'
 
 #Delete
-@APP.route("/<int:id>", methods=['DELETE'])
+@APP.route("/post/<int:id>", methods=['DELETE'])
 def deletepost(id):
     """Deletes a post"""
     file_name = 'posts/'+ str(id) + '.json'
     try:
         singlepost(id)
+        deletepst(id)
     except:
         return '{"success":"false"}'
     os.remove(file_name)
@@ -162,13 +188,14 @@ def deletepost(id):
 def createuser():
     """Creates a user"""
     uids = alluserids()
-    uids.sort()
+    uids.sort(reverse=True)
     uid = uids[0] + 1
     newuser = json.loads(request.data)
     newuser['uid'] = uid
     newuser['password'] = hashpswd(newuser['password'])
     edituser(uid, newuser)
-    return jsonify({"success": "true", "post_id": uid})
+    updateusr(uid)
+    return jsonify({"success": "true", "user_id": uid})
 
 #Read
 @APP.route("/usr/<id>", methods=['GET'])
@@ -183,7 +210,7 @@ def getallusers():
     users = allusers()
     return jsonify(users)
 #Update
-@APP.route("/", methods=["POST"])
+@APP.route("/usr", methods=["POST"])
 def changeuser():
     """Changes a users data"""
     cuser = json.loads(request.data)
@@ -194,7 +221,7 @@ def changeuser():
         return '{"success":"false"}'
     
 #Delete
-@APP.route("/<int:id>", methods=['DELETE'])
+@APP.route("/usr/<int:id>", methods=['DELETE'])
 def deleteuser(id):
     file_name = 'userdata/'+ str(id) + '.json'
     try:
