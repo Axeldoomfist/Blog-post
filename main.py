@@ -34,6 +34,7 @@ def ask():
     return asks
 
 def allposts():
+    """Gets all the post ids"""
     pids = allpostids()
     posts = []
     for pid in pids:
@@ -42,10 +43,12 @@ def allposts():
     return posts
 
 def singlepost(id):
+    """Gets the file of the post that is selected"""
     post = openfile("posts/"+ str(id) + ".json")
     return json.loads(post)
 
 def editpost(id, content):
+    """Edits the content of the post selected"""
     file_name = 'posts/' + str(id) + '.json'
     try:
         writefile(file_name, content)
@@ -54,18 +57,21 @@ def editpost(id, content):
         raise IOError
 
 def updatepost(id):
+    """Updates the total amount of posts made"""
     file_name = 'posts.json'
     posts = json.loads(openfile(file_name))
     posts['ids'].append(id)
     writefile(file_name, posts)
 
 def deletepst(id):
+    """Updates the total amount of posts made"""
     file_name = 'posts.json'
     posts = json.loads(openfile(file_name))
     posts['ids'].pop(id-1)
     writefile(file_name, posts)
 
 def getposttable():
+    """Gets the amount of posts made"""
     postsobj = json.loads(openfile("posts.json"))
     return postsobj
 def allpostids():
@@ -74,6 +80,7 @@ def allpostids():
     return ptable['ids']
 
 def allusers():
+    """Gets all the user ids"""
     uids = alluserids()
     users = []
     for uid in uids:
@@ -82,30 +89,35 @@ def allusers():
     return users
 
 def singleuser(id):
+    """Gets the file of the user that is selected"""
     usr = openfile("userdata/"+ str(id) + ".json")
     return json.loads(usr)
 
 def edituser(id, content):
+    """Edits the user that is selected"""
     file_name = 'userdata/' + str(id) + '.json'
     try:
-        writefile(file_name,content)
+        writefile(file_name, content)
     except IOError:
         print('Error editing the file')
         raise IOError
 
 def updateusr(id):
+    """Updates the total amount of users created"""
     file_name = 'users.json'
     users = json.loads(openfile(file_name))
     users['ids'].append(id)
     writefile(file_name, users)
 
 def delusr(id):
+    """Updates the total amount of users created"""
     file_name = 'users.json'
     users = json.loads(openfile(file_name))
     users['ids'].pop(id-1)
     writefile(file_name, users)
 
 def getusertable():
+    """Gets the amount of users made"""
     userobj = json.loads(openfile("users.json"))
     return userobj
 
@@ -124,8 +136,8 @@ def hashpswd(password):
 def checkpswd(hashedpswd, user_pswd):
     """Checks the users password"""
     password, salt = hashedpswd.split(':')
-    password = hashlib.md5(salt.encode('UTF-8') + user_pswd.encode('UTF-8'))
-    password = password.hexdigest()
+    hashpassword = hashlib.md5(salt.encode('UTF-8') + user_pswd.encode('UTF-8'))
+    hashedpswd = hashpassword.hexdigest()
     return password
 
 # Route definitions
@@ -152,7 +164,7 @@ def createpost():
 #Read
 @APP.route("/post/<id>", methods=["GET"])
 def getpost(id):
-    """Main function"""
+    """Gets the specified post"""
     post = singlepost(id)
     post_json = jsonify(**post)
     return post_json
@@ -209,6 +221,7 @@ def createuser():
 #Read
 @APP.route("/usr/<id>", methods=['GET'])
 def getuser(id):
+    """Gets the specified user"""
     user = singleuser(id)
     user_json = jsonify(**user)
     return user_json
@@ -229,10 +242,11 @@ def changeuser():
         return '{"success":"true"}'
     except IOError:
         return '{"success":"false"}'
-    
+
 #Delete
 @APP.route("/usr/<int:id>", methods=['DELETE'])
 def deleteuser(id):
+    """Deletes the selected user"""
     file_name = 'userdata/'+ str(id) + '.json'
     try:
         singleuser(id)
