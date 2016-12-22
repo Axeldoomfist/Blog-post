@@ -7,6 +7,7 @@ from flask_cors import CORS, cross_origin
 
 NOW = datetime.datetime.now()
 APP = Flask(__name__)
+CORS(APP)
 
 def openfile(file):
     """Gets a file and returns the output"""
@@ -211,11 +212,14 @@ def createuser():
     uids = alluserids()
     uids.sort(reverse=True)
     uid = uids[0] + 1
-    newuser = json.loads(request.data)
-    newuser['uid'] = uid
-    newuser['password'] = hashpswd(newuser['password'])
-    edituser(uid, newuser)
-    updateusr(uid)
+    try:
+        newuser = json.loads(request.data)
+        newuser['uid'] = uid
+        newuser['password'] = hashpswd(newuser['password'])
+        edituser(uid, newuser)
+        updateusr(uid)
+    except:
+        return '{"success":"false"}'
     return jsonify({"success": "true", "user_id": uid})
 
 #Read
