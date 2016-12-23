@@ -57,19 +57,19 @@ def editpost(id, content):
         print('Error editing the file')
         raise IOError
 
-def updatepost(id):
+def update(id, name):
     """Updates the total amount of posts made"""
-    file_name = 'posts.json'
-    posts = json.loads(openfile(file_name))
-    posts['ids'].append(id)
-    writefile(file_name, posts)
+    file_name = name +'.json'
+    idup = json.loads(openfile(file_name))
+    idup['ids'].append(id)
+    writefile(file_name, idup)
 
-def deletepst(id):
+def delete(id, name):
     """Updates the total amount of posts made"""
-    file_name = 'posts.json'
-    posts = json.loads(openfile(file_name))
-    posts['ids'].pop(id-1)
-    writefile(file_name, posts)
+    file_name = name +'.json'
+    idup = json.loads(openfile(file_name))
+    idup['ids'].pop(id-1)
+    writefile(file_name, idup)
 
 def getposttable():
     """Gets the amount of posts made"""
@@ -103,19 +103,19 @@ def edituser(id, content):
         print('Error editing the file')
         raise IOError
 
-def updateusr(id):
-    """Updates the total amount of users created"""
-    file_name = 'users.json'
-    users = json.loads(openfile(file_name))
-    users['ids'].append(id)
-    writefile(file_name, users)
+# def updateusr(id):
+#     """Updates the total amount of users created"""
+#     file_name = 'users.json'
+#     users = json.loads(openfile(file_name))
+#     users['ids'].append(id)
+#     writefile(file_name, users)
 
-def delusr(id):
-    """Updates the total amount of users created"""
-    file_name = 'users.json'
-    users = json.loads(openfile(file_name))
-    users['ids'].pop(id-1)
-    writefile(file_name, users)
+# def delusr(id):
+#     """Updates the total amount of users created"""
+#     file_name = 'users.json'
+#     users = json.loads(openfile(file_name))
+#     users['ids'].pop(id-1)
+#     writefile(file_name, users)
 
 def getusertable():
     """Gets the amount of users made"""
@@ -159,7 +159,7 @@ def createpost():
     newpost['date'] = dtformat
     newpost['time'] = timeformat
     editpost(pid, newpost)
-    updatepost(pid)
+    update(pid, 'post')
     return jsonify({"success": "true", "post_id": pid})
 
 #Read
@@ -197,7 +197,7 @@ def deletepost(id):
     file_name = 'posts/'+ str(id) + '.json'
     try:
         singlepost(id)
-        deletepst(id)
+        delete(id, 'posts')
     except:
         return '{"success":"false"}'
     os.remove(file_name)
@@ -217,7 +217,7 @@ def createuser():
         newuser['uid'] = uid
         newuser['password'] = hashpswd(newuser['password'])
         edituser(uid, newuser)
-        updateusr(uid)
+        update(uid, 'users')
     except:
         return '{"success":"false"}'
     return jsonify({"success": "true", "user_id": uid})
@@ -254,7 +254,7 @@ def deleteuser(id):
     file_name = 'userdata/'+ str(id) + '.json'
     try:
         singleuser(id)
-        delusr(id)
+        delete(id, 'users')
     except:
         return '{"success":"false"}'
     os.remove(file_name)
