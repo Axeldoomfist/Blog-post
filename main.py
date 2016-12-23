@@ -43,9 +43,9 @@ def singleaccess(id, name):
     post = openfile(name + str(id) + ".json")
     return json.loads(post)
 
-def editpost(id, content):
+def editpost(id, content, name):
     """Edits the content of the post selected"""
-    file_name = 'posts/' + str(id) + '.json'
+    file_name = str(id) + '.json'
     try:
         writefile(file_name, content)
     except IOError:
