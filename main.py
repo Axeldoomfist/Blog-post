@@ -36,7 +36,7 @@ def ask():
 
 def allposts():
     """Gets all the post ids"""
-    pids = allpostids()
+    pids = allids('post')
     posts = []
     for pid in pids:
         file = singlepost(pid)
@@ -68,21 +68,22 @@ def delete(id, name):
     """Updates the total amount of posts made"""
     file_name = name +'.json'
     idup = json.loads(openfile(file_name))
-    idup['ids'].pop(id-1)
+    idup['ids'].pop(id)
     writefile(file_name, idup)
 
-def getposttable():
+def gettable(name):
     """Gets the amount of posts made"""
-    postsobj = json.loads(openfile("posts.json"))
-    return postsobj
-def allpostids():
+    table_data = json.loads(openfile(name + ".json"))
+    return table_data
+
+def allids(name):
     """Gets the post table"""
-    ptable = getposttable()
+    ptable = gettable(name)
     return ptable['ids']
 
 def allusers():
     """Gets all the user ids"""
-    uids = alluserids()
+    uids = allids('users')
     users = []
     for uid in uids:
         file = singleuser(uid)
@@ -103,29 +104,10 @@ def edituser(id, content):
         print('Error editing the file')
         raise IOError
 
-# def updateusr(id):
-#     """Updates the total amount of users created"""
-#     file_name = 'users.json'
-#     users = json.loads(openfile(file_name))
-#     users['ids'].append(id)
-#     writefile(file_name, users)
-
-# def delusr(id):
-#     """Updates the total amount of users created"""
-#     file_name = 'users.json'
-#     users = json.loads(openfile(file_name))
-#     users['ids'].pop(id-1)
-#     writefile(file_name, users)
-
-def getusertable():
-    """Gets the amount of users made"""
-    userobj = json.loads(openfile("users.json"))
-    return userobj
-
-def alluserids():
-    """Gets the user table"""
-    utable = getusertable()
-    return utable['ids']
+# def allids():
+#     """Gets the user table"""
+#     utable = gettable('user')
+#     return utable['ids']
 
 def hashpswd(password):
     """Hashes the users password"""
@@ -151,7 +133,7 @@ def createpost():
     """Creates a post"""
     dtformat = NOW.strftime('%d/%m/%Y')
     timeformat = NOW.strftime('%H:%M')
-    pids = allpostids()
+    pids = allids('post')
     pids.sort(reverse=True)
     pid = pids[0] + 1
     newpost = json.loads(request.data)
@@ -209,7 +191,7 @@ def deletepost(id):
 @APP.route("/usr", methods=['PUT'])
 def createuser():
     """Creates a user"""
-    uids = alluserids()
+    uids = allids('users')
     uids.sort(reverse=True)
     uid = uids[0] + 1
     try:
